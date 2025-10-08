@@ -1,2 +1,2 @@
 import os
-print(os.getenv('AIzaSyBs29GSQAzEAR7waCtjhiE1zLoDfjHoQxQ'))
+print(os.getenv('google_api_key'))
