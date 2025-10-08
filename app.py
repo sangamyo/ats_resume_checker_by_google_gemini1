@@ -3,16 +3,14 @@ from streamlit_extras.add_vertical_space import add_vertical_space
 import google.generativeai as genai
 import os
 import PyPDF2 as pdf
-from dotenv import load_dotenv
-
-load_dotenv() # Load all the environment variables from .env
 
 # ----------------------------
 # Configure Gemini API Key from Streamlit Secrets
 # ----------------------------
-# Make sure you have set the API key in Streamlit Secrets as:
-# GOOGLE_API_KEY="your_api_key_here"
-api_key = os.getenv("GOOGLE_API_KEY")  # <- Use Streamlit Secrets
+api_key = st.secrets.get("GOOGLE_API_KEY")  # <- Use Streamlit Secrets
+if not api_key:
+    st.error("Google API key is missing! Please add it in Streamlit Secrets.")
+    st.stop()
 
 genai.configure(api_key=api_key)
 
@@ -30,7 +28,8 @@ def get_gemini_model():
 def get_gemini_response(prompt):
     model = get_gemini_model()
     try:
-        response = model.generate_content(prompt, timeout=180)  # 3 minutes
+        # ✅ No timeout here
+        response = model.generate_content(prompt, timeout=None)
         return response.text
     except Exception as e:
         return f"Error: {str(e)}"
@@ -99,6 +98,8 @@ submit = st.button("Submit")
 # Processing
 # ----------------------------
 if submit:
+    st.cache_data.clear()
+    st.cache_resource.clear()
     if uploaded_file is not None:
         resume_text = input_pdf_text(uploaded_file)
         chunks = chunk_text(resume_text, chunk_size=1000)
